@@ -14,6 +14,8 @@
 		69BEDF902B12323C00F50740 /* BiCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69BEDF8F2B12323C00F50740 /* BiCalculatorTests.swift */; };
 		69BEDF9A2B12323C00F50740 /* BiCalculatorUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69BEDF992B12323C00F50740 /* BiCalculatorUITests.swift */; };
 		69BEDF9C2B12323C00F50740 /* BiCalculatorUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69BEDF9B2B12323C00F50740 /* BiCalculatorUITestsLaunchTests.swift */; };
+		69E75BBB2B144F3C008D090A /* PressedButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E75BB92B144F3C008D090A /* PressedButtonStyle.swift */; };
+		69E75BBC2B144F3C008D090A /* RoundedButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E75BBA2B144F3C008D090A /* RoundedButton.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +46,8 @@
 		69BEDF952B12323C00F50740 /* BiCalculatorUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BiCalculatorUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		69BEDF992B12323C00F50740 /* BiCalculatorUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiCalculatorUITests.swift; sourceTree = "<group>"; };
 		69BEDF9B2B12323C00F50740 /* BiCalculatorUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiCalculatorUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		69E75BB92B144F3C008D090A /* PressedButtonStyle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PressedButtonStyle.swift; sourceTree = "<group>"; };
+		69E75BBA2B144F3C008D090A /* RoundedButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoundedButton.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +100,8 @@
 			children = (
 				69BEDF7E2B12323800F50740 /* BiCalculatorApp.swift */,
 				69BEDF802B12323800F50740 /* ContentView.swift */,
+				69E75BB92B144F3C008D090A /* PressedButtonStyle.swift */,
+				69E75BBA2B144F3C008D090A /* RoundedButton.swift */,
 				69BEDF822B12323B00F50740 /* Assets.xcassets */,
 				69BEDF842B12323B00F50740 /* Preview Content */,
 			);
@@ -258,7 +264,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				69BEDF812B12323800F50740 /* ContentView.swift in Sources */,
+				69E75BBB2B144F3C008D090A /* PressedButtonStyle.swift in Sources */,
 				69BEDF7F2B12323800F50740 /* BiCalculatorApp.swift in Sources */,
+				69E75BBC2B144F3C008D090A /* RoundedButton.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
