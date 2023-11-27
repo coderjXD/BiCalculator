@@ -7,46 +7,55 @@
 
 import SwiftUI
 
-let scaleRatio = min(UIScreen.main.bounds.width, UIScreen.main.bounds.width) / 414
-
 struct RoundedButton: View {
-  
+
+  @State private var fontSize: CGFloat = Constant.screenWidth > Constant.minorScreenWidth ? 32 : 50
+
   let title: String
-  // default width/height ration is 1.2
-  let size: CGSize = CGSize(width: 96, height: 80)
-  let fontSize: CGFloat = 46
-  let backgroundColor: Color = Color.backgroundDigit
-  let backgroundColorPressed: Color = Color.backgroundDigitPressed
-  let foregroundColor: Color = Color.textLight
+  let backgroundColorName: String
+  let size: CGSize
   let action: () -> Void
+
+  let foregroundColorName: String = "text.light"
 
   var body: some View {
     Button(action: action) {
       Text(title)
-        .font(.system(size: fontSize * scaleRatio))
-        .foregroundStyle(foregroundColor)
+        .font(.system(size: fontSize))
+        .foregroundStyle(Color(foregroundColorName))
         .frame(width: size.width, height: size.height)
-        .scaleEffect(scaleRatio)
+        .background(Color(backgroundColorName))
+        .cornerRadius(10)
+        .onRotate { orientation in
+          fontSize = orientation.isPortrait ? 50 : 32
+        }
     }
-    .pressedStyle(
-      normalColor: backgroundColor,
-      pressedColor: backgroundColorPressed,
-      cornerRadius: 10
-    )
   }
 }
 
 #Preview {
   HStack {
-    RoundedButton(title: "+") {
+    RoundedButton(
+      title: "+",
+      backgroundColorName: "background.operator",
+      size: CGSize(width: 96, height: 80))
+    {
       print("+")
     }
 
-    RoundedButton(title: "+/-") {
+    RoundedButton(
+      title: "+/-",
+      backgroundColorName: "background.command",
+      size: CGSize(width: 96, height: 80))
+    {
       print("+/-")
     }
 
-    RoundedButton(title: "DEL") {
+    RoundedButton(
+      title: "DEL",
+      backgroundColorName: "background.command",
+      size: CGSize(width: 96, height: 80))
+    {
       print("DEL")
     }
   }
