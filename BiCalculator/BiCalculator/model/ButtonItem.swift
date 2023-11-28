@@ -1,5 +1,5 @@
 //
-//  ButtonItem.swift
+//  CalculatorItem.swift
 //  BiCalculator
 //
 //  Created by jay on 2023/11/27.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum ButtonItem {
+enum CalculatorItem {
 
   enum Command: String {
     case clear = "AC"
@@ -39,7 +39,7 @@ enum ButtonItem {
 
 // MARK: - convenience methods
 
-extension ButtonItem {
+extension CalculatorItem {
   var title: String {
     switch self {
     case .command(let command):
@@ -67,4 +67,4 @@ extension ButtonItem {
 
 // MARK: - Hashable
 
-extension ButtonItem: Hashable { }
+extension CalculatorItem: Hashable { }

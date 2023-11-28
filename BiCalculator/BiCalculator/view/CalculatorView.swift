@@ -1,5 +1,5 @@
 //
-//  KeyPadView.swift
+//  CalculatorView.swift
 //  BiCalculator
 //
 //  Created by jay on 2023/11/27.
@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CalculatorView: View {
 
-  let pads: [[ButtonItem]] = [
+  let pads: [[CalculatorItem]] = [
     [.command(.clear), .command(.negate), .command(.percent), .op(.divide)],
     [.digit(7), .digit(8), .digit(9), .op(.multiply)],
     [.digit(4), .digit(5), .digit(6), .op(.minus)],
@@ -67,7 +67,7 @@ struct CalculatorView: View {
   }
 
   @ViewBuilder
-  private func row(for items: [ButtonItem], offeredSize: CGSize) -> some View {
+  private func row(for items: [CalculatorItem], offeredSize: CGSize) -> some View {
     HStack(spacing: Constants.Scale.buttonPadding) {
       ForEach(items, id: \.self) { item in
         let itemSize = Constants.itemSize(offeredTotal: offeredSize, isZero: item.isZero)
