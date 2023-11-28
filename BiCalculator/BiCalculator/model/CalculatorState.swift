@@ -49,11 +49,11 @@ enum CalculatorState {
   private func apply(digit: Int) -> CalculatorState {
     switch self {
     case .left(let left):
-        .left("\(digit)" + left)
+        .left(left.takesIn(digit: digit))
     case .leftOp(let left, let op):
         .leftOpRight(left: left, op: op, right: "\(digit)")
     case .leftOpRight(let left, let op, let right):
-        .leftOpRight(left: left, op: op, right: "\(digit)" + right)
+        .leftOpRight(left: left, op: op, right: right.takesIn(digit: digit))
     case .error:
         .left("\(digit)")
     }
@@ -86,7 +86,17 @@ enum CalculatorState {
   }
 
   private func applyDot() -> CalculatorState {
-    return CalculatorState.error
+    switch self {
+    case .left(let left):
+      return .left(left.takesInDot())
+    case .leftOp(let left, let op):
+      return op == .equal ? .left("0.") : .leftOpRight(left: left, op: op, right: "0.")
+    case .leftOpRight(let left, let op, let right):
+      let newRight = right.contains(".") ? right : (right + ".")
+      return .leftOpRight(left: left, op: op, right: right.takesInDot())
+    case .error:
+      return .left("0.")
+    }
   }
 
   // MARK: - Apply command
@@ -113,7 +123,7 @@ enum CalculatorState {
     case .left(let left):
       .left(percent(string: left))
     case .leftOp(left: let left, op: let op):
-      .leftOp(left: left, op: op)
+      .leftOp(left: percent(string: left), op: op)
     case .leftOpRight(left: let left, op: let op, right: let right):
       .leftOpRight(left: left, op: op, right: percent(string: right))
     case .error:
@@ -132,6 +142,8 @@ enum CalculatorState {
     case .leftOpRight(let left, let op, let right):
       // calculate as the input sequence, not as the arithmetic associative property
       guard let left = Double(left), let right = Double(right) else { return .error }
+      // divided by zero
+      if right == 0 && op == .divide { return .error }
       let result = calculate(left: left, op: op, right: right)
       return .leftOp(left: "\(result)", op: operatr)
     case .error:
@@ -159,10 +171,19 @@ enum CalculatorState {
     switch self {
     case .left(let left):
       return .left(left)
+
     case .leftOp(let left, let op):
-      return .leftOpRight(left: left, op: op, right: left)
+      // 2+ takes in =, means 2+2
+
+      guard let left = Double(left) else { return .error }
+      // divided by zero
+      if left == 0 && op == .divide { return .error }
+      let result = calculate(left: left, op: op, right: left)
+      return .leftOp(left: "\(result)", op: op)
     case .leftOpRight(let left, let op, let right):
       guard let left = Double(left), let right = Double(right) else { return .error }
+      // divided by zero
+      if right == 0 && op == .divide { return .error }
       let result = calculate(left: left, op: op, right: right)
       return .left("\(result)")
     case .error:
@@ -197,8 +218,11 @@ enum CalculatorState {
     }
     return result
   }
+}
 
-  // MARK: - description for debugging & testing
+// MARK: - description for debugging & testing
+
+extension CalculatorState {
   var left: String? {
     switch self {
     case .left(let left):
@@ -239,5 +263,27 @@ enum CalculatorState {
       false
     }
   }
+}
 
+extension CalculatorState: Equatable {
+  static func == (lhs: Self, rhs: Self) -> Bool {
+    lhs.left == rhs.left
+    && lhs.right == rhs.right
+    && lhs.op == rhs.op
+    && lhs.isError == rhs.isError
+  }
+}
+
+extension String {
+  func takesIn(digit: Int) -> String {
+    if digit == 0 && (self == "0" || self == "-0") {
+      self
+    } else {
+      self + "\(digit)"
+    }
+  }
+
+  func takesInDot() -> String {
+    self.contains(".") ? self : (self + ".")
+  }
 }
