@@ -24,30 +24,18 @@ enum CalculatorState {
   var output: String {
     switch self {
     case .leftPending(let left):
-      pendingOutput(str: left)
+      left.pendingFormattedString
     case .leftDone(let left):
-      doneOutput(str: left)
+      left.finishedFormattedString
     case .leftOp(let left, _):
-      doneOutput(str: left)
+      left.finishedFormattedString
     case .leftOpRightPending(_, _, let right):
-      pendingOutput(str: right)
+      right.pendingFormattedString
     case .leftOpRightDone(_, _, let right):
-      doneOutput(str: right)
+      right.finishedFormattedString
     case .error:
-      "Error!"
+      "Error"
     }
-  }
-
-  private func pendingOutput(str: String) -> String {
-    guard let number = Double(str) else { return "Error" }
-    return NumberFormatter.localizedString(from: number as NSNumber, number: .decimal)
-  }
-
-  private func doneOutput(str: String) -> String {
-    guard let number = Double(str) else { return "Error" }
-    let formatted =
-      (Constant.displayFormatter.string(from: number as NSNumber) ?? "0").trimmingFragmentZeros()
-    return formatted
   }
 
   // state transfer function
@@ -91,15 +79,15 @@ enum CalculatorState {
   private func apply(op: Operator) -> CalculatorState {
     switch op {
     case .plus:
-      applyOperator(operatr: .plus)
+      applyNonEqualOperator(operatr: .plus)
     case .minus:
-      applyOperator(operatr: .minus)
+      applyNonEqualOperator(operatr: .minus)
     case .multiply:
-      applyOperator(operatr: .multiply)
+      applyNonEqualOperator(operatr: .multiply)
     case .divide:
-      applyOperator(operatr: .divide)
+      applyNonEqualOperator(operatr: .divide)
     case .equal:
-      applyOperator(operatr: .equal)
+      applyEqual()
     }
   }
 
@@ -131,7 +119,7 @@ enum CalculatorState {
     case .leftOp(left: let left, op: let op):
       .leftOpRightPending(left: left, op: op, right: "-0")
     case .leftOpRightPending(left: let left, op: let op, right: let right):
-      .leftOpRightDone(left: left, op: op, right: negate(string: right))
+      .leftOpRightPending(left: left, op: op, right: negate(string: right))
     case .leftOpRightDone, .error:
       .leftPending("-0")
     }
@@ -154,16 +142,17 @@ enum CalculatorState {
 
   // MARK: - Apply operator
 
-  private func applyOperator(operatr: Operator) -> CalculatorState {
+  private func applyEqual() -> CalculatorState {
     switch self {
     case .leftPending(let left):
-      return operatr == .equal ? .leftDone(left) : .leftOp(left: left, op: operatr)
+      return .leftDone(left)
     case .leftDone(let left):
-      return operatr == .equal ? .leftDone(left) : .leftOp(left: left, op: operatr)
+      return .leftDone(left)
     case .leftOp(let left, let op):
-      guard operatr == .equal else { return .leftOp(left: left, op: operatr) }
       // [2 +] takes in `=`, this means [2 + 2 =]
       guard let left = Double(left) else { return .error }
+      // divided by 0
+      guard !(left == 0 && op == .divide) else { return .error }
       let result = calculate(left: left, op: op, right: left)
       return .leftDone("\(result)")
     case .leftOpRightPending(let left, let op, let right):
@@ -172,14 +161,41 @@ enum CalculatorState {
       // divided by zero
       guard !(right == 0 && op == .divide) else { return .error }
       let result = calculate(left: left, op: op, right: right)
-      return operatr == .equal ? .leftDone("\(result)") : .leftOp(left: "\(result)", op: operatr)
+      return .leftDone("\(result)")
     case .leftOpRightDone(left: let left, op: let op, right: let right):
       // calculate as the input sequence, not as the arithmetic associative property
       guard let left = Double(left), let right = Double(right) else { return .error }
       // divided by zero
       guard !(right == 0 && op == .divide) else { return .error }
       let result = calculate(left: left, op: op, right: right)
-      return operatr == .equal ? .leftDone("\(result)") : .leftOp(left: "\(result)", op: operatr)
+      return .leftDone("\(result)")
+    case .error:
+      return .leftPending("0")
+    }
+  }
+
+  private func applyNonEqualOperator(operatr: Operator) -> CalculatorState {
+    switch self {
+    case .leftPending(let left):
+      return .leftOp(left: left, op: operatr)
+    case .leftDone(let left):
+      return .leftOp(left: left, op: operatr)
+    case .leftOp(let left, _):
+      return .leftOp(left: left, op: operatr)
+    case .leftOpRightPending(let left, let op, let right):
+      // calculate as the input sequence, not as the arithmetic associative property
+      guard let left = Double(left), let right = Double(right) else { return .error }
+      // divided by zero
+      guard !(right == 0 && op == .divide) else { return .error }
+      let result = calculate(left: left, op: op, right: right)
+      return .leftOp(left: "\(result)", op: operatr)
+    case .leftOpRightDone(left: let left, op: let op, right: let right):
+      // calculate as the input sequence, not as the arithmetic associative property
+      guard let left = Double(left), let right = Double(right) else { return .error }
+      // divided by zero
+      guard !(right == 0 && op == .divide) else { return .error }
+      let result = calculate(left: left, op: op, right: right)
+      return .leftOp(left: "\(result)", op: operatr)
     case .error:
       return .leftOp(left: "0", op: operatr)
     }
@@ -268,38 +284,3 @@ extension CalculatorState {
 }
 
 extension CalculatorState: Equatable { }
-
-extension String {
-  fileprivate func takesIn(digit: Int) -> String {
-    if digit == 0 && (self == "0" || self == "-0") {
-      self
-    } else if self == "0" {
-      "\(digit)"
-    } else if self == "-0" {
-      "-\(digit)"
-    } else {
-      self + "\(digit)"
-    }
-  }
-
-  fileprivate func takesInDot() -> String {
-    self.contains(".") ? self : (self + ".")
-  }
-
-  fileprivate func trimmingFragmentZeros() -> String {
-    var result = self
-    if result.contains(".") {
-      result = result.trimmingCharacters(in: CharacterSet(arrayLiteral: "0"))
-    }
-    if result.hasSuffix(".") {
-      result = String(result.dropLast())
-    }
-    if result == "" {
-      result = "0"
-    }
-    if result.starts(with: ".") {
-      result = "0" + result
-    }
-    return result
-  }
-}

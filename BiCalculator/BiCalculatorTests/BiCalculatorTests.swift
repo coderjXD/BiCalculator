@@ -57,19 +57,19 @@ final class BiCalculatorTests: XCTestCase {
 
   func testCalculatorStateTransferLeft() throws {
 
-    // [0.32] + `5` --> [left-"0.325"]
+    // [0.32] + `5` --> [leftPending-"0.325"]
     let res0 = stateLeft.apply(item: itemDigit0)
     XCTAssertEqual(res0, CalculatorState.leftPending("0.325"))
 
-    // [0.32] + `AC` --> [left-"0"]
+    // [0.32] + `AC` --> [leftPending-"0"]
     let res1 = stateLeft.apply(item: itemCommandClear)
     XCTAssertEqual(res1, CalculatorState.leftPending("0"))
 
-    // [0.32] + `±` --> [left-"-0.32"]
+    // [0.32] + `±` --> [leftPending-"-0.32"]
     let res2 = stateLeft.apply(item: itemCommandNegate)
-    XCTAssertEqual(res2, CalculatorState.leftDone("-0.32"))
+    XCTAssertEqual(res2, CalculatorState.leftPending("-0.32"))
 
-    // [0.32] + `%` --> [left-"0.0032"]
+    // [0.32] + `%` --> [leftPending-"0.0032"]
     let res3 = stateLeft.apply(item: itemCommandPercent)
     XCTAssertEqual(res3, CalculatorState.leftDone("0.0032"))
 
@@ -106,9 +106,9 @@ final class BiCalculatorTests: XCTestCase {
     let res4 = stateLO0.apply(item: itemOpPlus)
     XCTAssertEqual(res4, CalculatorState.leftOp(left: "0.32", op: .plus))
 
-    // [0.32 x] + `=` --> [leftOp-"0.1024", x]
+    // [0.32 x] + `=` --> [leftDone-"0.1024"]
     let res5 = stateLO0.apply(item: itemOpEqual)
-    XCTAssertEqual(res5, CalculatorState.leftOp(left: "0.1024", op: .multiply))
+    XCTAssertEqual(res5, CalculatorState.leftDone("0.1024"))
   }
 
   func testCalculatorStateTransferLeftOpRight() throws {
@@ -118,7 +118,7 @@ final class BiCalculatorTests: XCTestCase {
 
     // [0.32 x 100] + `±` --> [LOR-"0.32", x, "-100"]
     let res1 = stateLOR0.apply(item: itemCommandNegate)
-    XCTAssertEqual(res1, CalculatorState.leftOpRightDone(left: "0.32", op: .multiply, right: "-100"))
+    XCTAssertEqual(res1, CalculatorState.leftOpRightPending(left: "0.32", op: .multiply, right: "-100"))
 
     // [0.32 x 100] + `%` --> [LOR-"0.32", x, "1"]
     let res2 = stateLOR0.apply(item: itemCommandPercent)

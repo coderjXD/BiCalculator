@@ -16,6 +16,10 @@ struct CalculatorView: View {
     isSecondary ? viewModel.stateSecond : viewModel.state
   }
 
+  var record: String {
+    isSecondary ? viewModel.recordSecondary : viewModel.record
+  }
+
   var body: some View {
     GeometryReader { geometry in
       let size = geometry.size
@@ -37,6 +41,7 @@ struct CalculatorView: View {
       Spacer()
       Text(state.output)
         .font(.system(size: fontSize))
+        .minimumScaleFactor(0.5)
         .frame(height: height)
     }
   }
@@ -46,8 +51,9 @@ struct CalculatorView: View {
     let fontSize = Constants.recordFont(isPortrait: viewModel.isPortrait)
     let height = Constants.recordHeight(isPortrait: viewModel.isPortrait)
     HStack(alignment: .bottom) {
-      Text("89x15=1335")
+      Text(record)
         .font(.system(size: fontSize))
+        .minimumScaleFactor(0.5)
         .frame(height: height)
       Spacer()
     }
