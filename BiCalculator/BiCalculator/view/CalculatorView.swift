@@ -9,7 +9,12 @@ import SwiftUI
 
 struct CalculatorView: View {
 
+  let isSecondary: Bool
   @EnvironmentObject var viewModel: BiCalculatorViewModel
+
+  var state: CalculatorState {
+    isSecondary ? viewModel.stateSecond : viewModel.state
+  }
 
   var body: some View {
     GeometryReader { geometry in
@@ -30,7 +35,7 @@ struct CalculatorView: View {
     let height = Constants.displayHeight(isPortrait: viewModel.isPortrait)
     HStack {
       Spacer()
-      Text(viewModel.state.output)
+      Text(state.output)
         .font(.system(size: fontSize))
         .frame(height: height)
     }
@@ -68,7 +73,7 @@ struct CalculatorView: View {
           backgroundColorName: item.backgroundColorName,
           size: itemSize)
         {
-          viewModel.apply(item: item)
+          viewModel.apply(item: item, isSecondary: isSecondary)
         }
       }
     }
@@ -150,13 +155,13 @@ extension CalculatorView {
 
 #Preview("Portrait", traits: .portrait) {
   HStack {
-    CalculatorView()
+    CalculatorView(isSecondary: false)
   }
 }
 
 #Preview("Landscape", traits: .landscapeLeft) {
   HStack {
-    CalculatorView()
-    CalculatorView()
+    CalculatorView(isSecondary: false)
+    CalculatorView(isSecondary: true)
   }
 }

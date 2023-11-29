@@ -8,9 +8,9 @@
 import SwiftUI
 
 class BiCalculatorViewModel: ObservableObject {
-  
-  @Published var state = CalculatorState.leftPending("0")
 
+  @Published var state = CalculatorState.leftPending("0")
+  @Published var stateSecond = CalculatorState.leftPending("0")
   @Published var isPortrait = true
 
   let pads: [[CalculatorItem]] = [
@@ -21,8 +21,12 @@ class BiCalculatorViewModel: ObservableObject {
     [.digit(0), .dot, .op(.equal)],
   ]
 
-  func apply(item: CalculatorItem) {
-    state = state.apply(item: item)
+  func apply(item: CalculatorItem, isSecondary: Bool = false) {
+    if isSecondary {
+      stateSecond = stateSecond.apply(item: item)
+    }else {
+      state = state.apply(item: item)
+    }
   }
 }
 

@@ -14,10 +14,10 @@ struct BiCalculatorView: View {
   var body: some View {
     Group {
       if viewModel.isPortrait {
-        CalculatorView()
+        CalculatorView(isSecondary: false)
       }else {
         HStack {
-          CalculatorView()
+          CalculatorView(isSecondary: false)
           VStack {
             rightButton
             leftButton
@@ -26,7 +26,7 @@ struct BiCalculatorView: View {
           }
           .padding(.bottom, 8)
           .padding(.top, 86)
-          CalculatorView()
+          CalculatorView(isSecondary: true)
         }
       }
     }
