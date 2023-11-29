@@ -13,11 +13,11 @@ struct CalculatorView: View {
   @EnvironmentObject var viewModel: BiCalculatorViewModel
 
   var state: CalculatorState {
-    isSecondary ? viewModel.stateSecond : viewModel.state
+    isSecondary ? viewModel.stateSecondary : viewModel.statePrimary
   }
 
   var record: String {
-    isSecondary ? viewModel.recordSecondary : viewModel.record
+    isSecondary ? viewModel.recordSecondary : viewModel.recordPrimary
   }
 
   var body: some View {

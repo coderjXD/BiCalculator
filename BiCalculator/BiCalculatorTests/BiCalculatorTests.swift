@@ -131,6 +131,8 @@ final class BiCalculatorTests: XCTestCase {
     // TODO: - leftOpRightDone
   }
 
+  // TODO: - third input test
+
   func testPerformanceExample() throws {
     // This is an example of a performance test case.
     self.measure {

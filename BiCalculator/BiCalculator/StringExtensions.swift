@@ -12,7 +12,7 @@ import Foundation
 extension String {
   var pendingFormattedString: String {
     if self == "" { return "" }
-    guard let number = Double(self) else {
+    guard let number = Constant.displayFormatter.number(from: self) as? Double else {
       return "Error"
     }
     let components = self.components(separatedBy: ".")
@@ -24,7 +24,7 @@ extension String {
 
   var finishedFormattedString: String {
     if self == "" { return "" }
-    guard let number = Double(self) else {
+    guard let number = Constant.displayFormatter.number(from: self) as? Double else {
       return "Error"
     }
     let formatted =

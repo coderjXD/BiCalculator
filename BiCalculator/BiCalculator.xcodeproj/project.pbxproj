@@ -18,7 +18,7 @@
 		69CC7D012B16F73100B30471 /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69CC7D002B16F73100B30471 /* StringExtensions.swift */; };
 		69E75BBC2B144F3C008D090A /* RoundedButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E75BBA2B144F3C008D090A /* RoundedButton.swift */; };
 		69E75BBE2B145049008D090A /* CalculatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E75BBD2B145049008D090A /* CalculatorView.swift */; };
-		69E75BC02B145108008D090A /* ButtonItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E75BBF2B145108008D090A /* ButtonItem.swift */; };
+		69E75BC02B145108008D090A /* CalculatorItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E75BBF2B145108008D090A /* CalculatorItem.swift */; };
 		69E75BC22B147E62008D090A /* Constant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E75BC12B147E62008D090A /* Constant.swift */; };
 		69E75BC42B14DAD3008D090A /* DeviceRotationViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E75BC32B14DAD3008D090A /* DeviceRotationViewModifier.swift */; };
 		69E75BC82B1576D0008D090A /* CalculatorState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69E75BC72B1576D0008D090A /* CalculatorState.swift */; };
@@ -56,7 +56,7 @@
 		69CC7D002B16F73100B30471 /* StringExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
 		69E75BBA2B144F3C008D090A /* RoundedButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoundedButton.swift; sourceTree = "<group>"; };
 		69E75BBD2B145049008D090A /* CalculatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorView.swift; sourceTree = "<group>"; };
-		69E75BBF2B145108008D090A /* ButtonItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonItem.swift; sourceTree = "<group>"; };
+		69E75BBF2B145108008D090A /* CalculatorItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorItem.swift; sourceTree = "<group>"; };
 		69E75BC12B147E62008D090A /* Constant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constant.swift; sourceTree = "<group>"; };
 		69E75BC32B14DAD3008D090A /* DeviceRotationViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceRotationViewModifier.swift; sourceTree = "<group>"; };
 		69E75BC72B1576D0008D090A /* CalculatorState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalculatorState.swift; sourceTree = "<group>"; };
@@ -169,7 +169,7 @@
 		69E75BC62B15744B008D090A /* model */ = {
 			isa = PBXGroup;
 			children = (
-				69E75BBF2B145108008D090A /* ButtonItem.swift */,
+				69E75BBF2B145108008D090A /* CalculatorItem.swift */,
 				69E75BC72B1576D0008D090A /* CalculatorState.swift */,
 			);
 			path = model;
@@ -311,7 +311,7 @@
 				69CC7CFF2B1636D200B30471 /* BiCalculatorViewModel.swift in Sources */,
 				69E75BC82B1576D0008D090A /* CalculatorState.swift in Sources */,
 				69BEDF7F2B12323800F50740 /* BiCalculatorApp.swift in Sources */,
-				69E75BC02B145108008D090A /* ButtonItem.swift in Sources */,
+				69E75BC02B145108008D090A /* CalculatorItem.swift in Sources */,
 				69E75BBC2B144F3C008D090A /* RoundedButton.swift in Sources */,
 				69E75BC22B147E62008D090A /* Constant.swift in Sources */,
 				69CC7CFC2B16314400B30471 /* BiCalculatorView.swift in Sources */,

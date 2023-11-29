@@ -9,16 +9,17 @@ import SwiftUI
 
 class BiCalculatorViewModel: ObservableObject {
 
-  @Published var state = CalculatorState.leftPending("0")
-  @Published var stateSecond = CalculatorState.leftPending("0")
+  @Published var statePrimary = CalculatorState.leftPending("0")
+  @Published var stateSecondary = CalculatorState.leftPending("0")
   @Published var isPortrait = true
 
-  @Published var record = ""
+  @Published var recordPrimary = ""
   @Published var recordSecondary = ""
 
-  private var historyFirst = [CalculatorItem.digit(0)]
-  private var historySecond = [CalculatorItem.digit(0)]
+  private var historyPrimary = [CalculatorItem.digit(0)]
+  private var historySecondary = [CalculatorItem.digit(0)]
 
+  private var lastThirdInputIsFromPrimary: Bool = true
 
   let pads: [[CalculatorItem]] = [
     [.command(.clear), .command(.negate), .command(.percent), .op(.divide)],
@@ -30,26 +31,58 @@ class BiCalculatorViewModel: ObservableObject {
 
   func apply(item: CalculatorItem, isSecondary: Bool = false) {
     if isSecondary {
-      stateSecond = stateSecond.apply(item: item)
+      stateSecondary = stateSecondary.apply(item: item)
       if case .command(let cmd) = item, cmd == .clear {
-        historySecond = [CalculatorItem.digit(0)]
+        historySecondary = [CalculatorItem.digit(0)]
         recordSecondary = ""
-      }else {
-        historySecond.append(item)
-        recordSecondary = records(from: historySecond).last ?? ""
+      } else {
+        historySecondary.append(item)
+        recordSecondary = records(from: historySecondary).last ?? ""
       }
-    }else {
-      state = state.apply(item: item)
+    } else {
+      statePrimary = statePrimary.apply(item: item)
       if case .command(let cmd) = item, cmd == .clear {
-        historyFirst = [CalculatorItem.digit(0)]
-        record = ""
-      }else {
-        historyFirst.append(item)
-        record = records(from: historyFirst).last ?? ""
+        historyPrimary = [CalculatorItem.digit(0)]
+        recordPrimary = ""
+      } else {
+        historyPrimary.append(item)
+        recordPrimary = records(from: historyPrimary).last ?? ""
       }
     }
   }
 
+  func applyThirdInput(forSecondary: Bool) {
+    let number = forSecondary ? statePrimary.output : stateSecondary.output
+    // when with comma, parsing to double would fail
+    let numberWithoutComma = number.replacingOccurrences(of: ",", with: "")
+    let inputItem = CalculatorItem.thirdInput(numberWithoutComma)
+    apply(item: inputItem, isSecondary: forSecondary)
+    lastThirdInputIsFromPrimary = forSecondary
+  }
+
+  func withdrawThirdInput() {
+    var history = lastThirdInputIsFromPrimary ? historySecondary : historyPrimary
+
+    var state: CalculatorState = lastThirdInputIsFromPrimary ? stateSecondary : statePrimary
+    if let lastItem = history.last, lastItem.isThirdInput {
+      history.removeLast()
+      state = history.reduce(CalculatorState.leftPending("0")) {
+        partialResult, item in
+        return partialResult.apply(item: item)
+      }
+    }
+
+    if lastThirdInputIsFromPrimary {
+      historySecondary = history
+      stateSecondary = state
+    } else {
+      historyPrimary = history
+      statePrimary = state
+    }
+
+    lastThirdInputIsFromPrimary.toggle()
+  }
+  
   private func records(from history: [CalculatorItem]) -> [String] {
     var result = [String]()
     var prevState = CalculatorState.leftPending("0")

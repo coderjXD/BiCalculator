@@ -49,19 +49,21 @@ enum CalculatorState {
       apply(op: op)
     case .dot:
       applyDot()
+    case .thirdInput(let number):
+      applyThirdInput(number: number)
     }
   }
 
   private func apply(digit: Int) -> CalculatorState {
     switch self {
     case .leftPending(let left):
-      .leftPending(left.takesIn(digit: digit))
+        .leftPending(left.takesIn(digit: digit))
     case .leftOp(let left, let op):
-      .leftOpRightPending(left: left, op: op, right: "\(digit)")
+        .leftOpRightPending(left: left, op: op, right: "\(digit)")
     case .leftOpRightPending(let left, let op, let right):
-      .leftOpRightPending(left: left, op: op, right: right.takesIn(digit: digit))
+        .leftOpRightPending(left: left, op: op, right: right.takesIn(digit: digit))
     case .leftDone, .leftOpRightDone, .error:
-      .leftPending("\(digit)")
+        .leftPending("\(digit)")
     }
   }
 
@@ -94,14 +96,25 @@ enum CalculatorState {
   private func applyDot() -> CalculatorState {
     switch self {
     case .leftPending(let left):
-      .leftPending(left.takesInDot())
+        .leftPending(left.takesInDot())
     case .leftOp(let left, let op):
-      .leftOpRightPending(left: left, op: op, right: "0.")
+        .leftOpRightPending(left: left, op: op, right: "0.")
     case .leftOpRightPending(let left, let op, let right):
-      .leftOpRightPending(left: left, op: op, right: right.takesInDot())
+        .leftOpRightPending(left: left, op: op, right: right.takesInDot())
     case .leftDone, .leftOpRightDone, .error:
-      .leftPending("0.")
+        .leftPending("0.")
     }
+  }
+
+  private func applyThirdInput(number: String) -> CalculatorState {
+    let state: CalculatorState =
+    switch self {
+    case .leftPending, .leftDone, .leftOpRightPending, .leftOpRightDone, .error:
+        .leftDone(number)
+    case .leftOp(let left, let op):
+        .leftOpRightDone(left: left, op: op, right: number)
+    }
+    return state
   }
 
   // MARK: - Apply command
@@ -113,28 +126,28 @@ enum CalculatorState {
   private func applyNegate() -> CalculatorState {
     switch self {
     case .leftPending(let left):
-      .leftPending(negate(string: left))
+        .leftPending(negate(string: left))
     case .leftDone(let left):
-      .leftDone(negate(string: left))
+        .leftDone(negate(string: left))
     case .leftOp(left: let left, op: let op):
-      .leftOpRightPending(left: left, op: op, right: "-0")
+        .leftOpRightPending(left: left, op: op, right: "-0")
     case .leftOpRightPending(left: let left, op: let op, right: let right):
-      .leftOpRightPending(left: left, op: op, right: negate(string: right))
+        .leftOpRightPending(left: left, op: op, right: negate(string: right))
     case .leftOpRightDone, .error:
-      .leftPending("-0")
+        .leftPending("-0")
     }
   }
 
   private func applyPercent() -> CalculatorState {
     switch self {
     case .leftPending(let left):
-      .leftDone(percent(string: left))
+        .leftDone(percent(string: left))
     case .leftDone(let left):
-      .leftDone(percent(string: left))
+        .leftDone(percent(string: left))
     case .leftOp(left: let left, op: let op):
-      .leftOp(left: percent(string: left), op: op)
+        .leftOp(left: percent(string: left), op: op)
     case .leftOpRightPending(left: let left, op: let op, right: let right):
-      .leftOpRightDone(left: left, op: op, right: percent(string: right))
+        .leftOpRightDone(left: left, op: op, right: percent(string: right))
     case .leftOpRightDone, .error:
         .leftPending("0")
     }

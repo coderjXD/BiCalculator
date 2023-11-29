@@ -15,7 +15,7 @@ struct BiCalculatorView: View {
     Group {
       if viewModel.isPortrait {
         CalculatorView(isSecondary: false)
-      }else {
+      } else {
         HStack {
           CalculatorView(isSecondary: false)
           VStack {
@@ -40,19 +40,19 @@ struct BiCalculatorView: View {
 
   private var rightButton: some View {
     button(title: "→", color: .green) {
-
+      viewModel.applyThirdInput(forSecondary: true)
     }
   }
 
   private var leftButton: some View {
     button(title: "←", color: .green) {
-
+      viewModel.applyThirdInput(forSecondary: false)
     }
   }
 
   private var deleteButton: some View {
     button(title: "DEL", color: .gray) {
-
+      viewModel.withdrawThirdInput()
     }
   }
 
