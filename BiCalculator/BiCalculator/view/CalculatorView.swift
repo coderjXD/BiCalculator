@@ -10,6 +10,7 @@ import SwiftUI
 struct CalculatorView: View {
 
   let isSecondary: Bool
+  let isLandscape: Bool
   @EnvironmentObject var viewModel: BiCalculatorViewModel
 
   var state: CalculatorState {
@@ -35,8 +36,8 @@ struct CalculatorView: View {
 
   @ViewBuilder
   private func display(offeredSize: CGSize) -> some View {
-    let fontSize = Constants.displayFont(isPortrait: viewModel.isPortrait)
-    let height = Constants.displayHeight(isPortrait: viewModel.isPortrait)
+    let fontSize = Constants.displayFont(isPortrait: !isLandscape)
+    let height = Constants.displayHeight(isPortrait: !isLandscape)
     HStack {
       Spacer()
       Text(state.output)
@@ -48,8 +49,8 @@ struct CalculatorView: View {
 
   @ViewBuilder
   private func record(offeredSize: CGSize) -> some View {
-    let fontSize = Constants.recordFont(isPortrait: viewModel.isPortrait)
-    let height = Constants.recordHeight(isPortrait: viewModel.isPortrait)
+    let fontSize = Constants.recordFont(isPortrait: !isLandscape)
+    let height = Constants.recordHeight(isPortrait: !isLandscape)
     HStack(alignment: .bottom) {
       Text(record)
         .font(.system(size: fontSize))
@@ -77,7 +78,8 @@ struct CalculatorView: View {
         RoundedButton(
           title: item.title,
           backgroundColorName: item.backgroundColorName,
-          size: itemSize)
+          size: itemSize,
+          fontSize: isLandscape ? 32 : 50)
         {
           viewModel.apply(item: item, isSecondary: isSecondary)
         }
@@ -89,7 +91,7 @@ struct CalculatorView: View {
 extension CalculatorView {
   struct Constants {
     struct Font {
-      static let portraitDisplay: CGFloat = 50
+      static let portraitDisplay: CGFloat = 60
       static let landscapeDisplay: CGFloat = 35
 
       static let portraitRecord: CGFloat = 40
@@ -156,18 +158,5 @@ extension CalculatorView {
       let spanWidth = itemWidth * 2 + Scale.buttonPadding
       return CGSize(width: isZero ? spanWidth : itemWidth, height: min(itemHeight, Scale.maxButtonHeight))
     }
-  }
-}
-
-#Preview("Portrait", traits: .portrait) {
-  HStack {
-    CalculatorView(isSecondary: false)
-  }
-}
-
-#Preview("Landscape", traits: .landscapeLeft) {
-  HStack {
-    CalculatorView(isSecondary: false)
-    CalculatorView(isSecondary: true)
   }
 }

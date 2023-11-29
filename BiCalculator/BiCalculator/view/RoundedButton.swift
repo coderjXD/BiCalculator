@@ -9,11 +9,10 @@ import SwiftUI
 
 struct RoundedButton: View {
 
-  @EnvironmentObject var viewModel: BiCalculatorViewModel
-
   let title: String
   let backgroundColorName: String
   let size: CGSize
+  let fontSize: CGFloat
   let action: () -> Void
 
   let foregroundColorName: String = "text.light"
@@ -21,7 +20,7 @@ struct RoundedButton: View {
   var body: some View {
     Button(action: action) {
       Text(title)
-        .font(.system(size: viewModel.isPortrait ? 50 : 32))
+        .font(.system(size: fontSize))
         .foregroundStyle(Color(foregroundColorName))
         .frame(width: size.width, height: size.height)
         .background(Color(backgroundColorName))
@@ -35,7 +34,8 @@ struct RoundedButton: View {
     RoundedButton(
       title: "+",
       backgroundColorName: "background.operator",
-      size: CGSize(width: 96, height: 80))
+      size: CGSize(width: 96, height: 80),
+      fontSize: 50)
     {
       print("+")
     }
@@ -43,7 +43,8 @@ struct RoundedButton: View {
     RoundedButton(
       title: "+/-",
       backgroundColorName: "background.command",
-      size: CGSize(width: 96, height: 80))
+      size: CGSize(width: 96, height: 80),
+      fontSize: 50)
     {
       print("+/-")
     }
@@ -51,7 +52,8 @@ struct RoundedButton: View {
     RoundedButton(
       title: "DEL",
       backgroundColorName: "background.command",
-      size: CGSize(width: 96, height: 80))
+      size: CGSize(width: 96, height: 80),
+      fontSize: 50)
     {
       print("DEL")
     }

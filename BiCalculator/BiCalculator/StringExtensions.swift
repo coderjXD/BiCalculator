@@ -12,23 +12,23 @@ import Foundation
 extension String {
   var pendingFormattedString: String {
     if self == "" { return "" }
-    guard let number = Constant.displayFormatter.number(from: self) as? Double else {
+    guard let number = Constant.displayFormatter.number(from: self) else {
       return "Error"
     }
     let components = self.components(separatedBy: ".")
     let formattedFragment = components.count > 1 ? components[1] : ""
-    let formattedInt = NumberFormatter.localizedString(from: Int(number) as NSNumber, number: .decimal)
+    let formattedInt = Constant.displayFormatter.string(from: number.doubleValue.rounded(.towardZero) as NSNumber) ?? "0"
 
-    return self.contains(".") ? formattedInt + "." + formattedFragment : formattedInt
+    return self.contains(".") ? (formattedInt + "." + formattedFragment) : formattedInt
   }
 
   var finishedFormattedString: String {
     if self == "" { return "" }
-    guard let number = Constant.displayFormatter.number(from: self) as? Double else {
+    guard let number = Constant.displayFormatter.number(from: self) else {
       return "Error"
     }
     let formatted =
-      (Constant.displayFormatter.string(from: number as NSNumber) ?? "0").trimmingFragmentZeros()
+      (Constant.displayFormatter.string(from: number) ?? "0").trimmingFragmentZeros()
     return formatted
   }
 }

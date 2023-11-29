@@ -11,7 +11,6 @@ class BiCalculatorViewModel: ObservableObject {
 
   @Published var statePrimary = CalculatorState.leftPending("0")
   @Published var stateSecondary = CalculatorState.leftPending("0")
-  @Published var isPortrait = true
 
   @Published var recordPrimary = ""
   @Published var recordSecondary = ""

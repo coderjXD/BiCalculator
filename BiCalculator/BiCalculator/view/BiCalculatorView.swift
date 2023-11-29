@@ -12,12 +12,11 @@ struct BiCalculatorView: View {
   @EnvironmentObject var viewModel: BiCalculatorViewModel
 
   var body: some View {
-    Group {
-      if viewModel.isPortrait {
-        CalculatorView(isSecondary: false)
-      } else {
+    GeometryReader { geometry in
+
+      if geometry.size.width > geometry.size.height {
         HStack {
-          CalculatorView(isSecondary: false)
+          CalculatorView(isSecondary: false, isLandscape: true)
           VStack {
             rightButton
             leftButton
@@ -26,15 +25,11 @@ struct BiCalculatorView: View {
           }
           .padding(.bottom, 8)
           .padding(.top, 86)
-          CalculatorView(isSecondary: true)
+          CalculatorView(isSecondary: true, isLandscape: true)
         }
+      } else {
+        CalculatorView(isSecondary: false, isLandscape: false)
       }
-    }
-    .onRotate { orientation in
-      viewModel.isPortrait = orientation.isPortrait
-    }
-    .onAppear {
-      viewModel.isPortrait = UIScreen.main.bounds.height > Constant.minorScreenWidth
     }
   }
 
