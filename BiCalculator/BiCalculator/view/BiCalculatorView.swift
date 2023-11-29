@@ -9,11 +9,11 @@ import SwiftUI
 
 struct BiCalculatorView: View {
 
-  @State private var isPortrait = UIScreen.main.bounds.height > Constant.minorScreenWidth
+  @EnvironmentObject var viewModel: BiCalculatorViewModel
 
   var body: some View {
     Group {
-      if isPortrait {
+      if viewModel.isPortrait {
         CalculatorView()
       }else {
         HStack {
@@ -31,7 +31,10 @@ struct BiCalculatorView: View {
       }
     }
     .onRotate { orientation in
-      isPortrait = orientation.isPortrait
+      viewModel.isPortrait = orientation.isPortrait
+    }
+    .onAppear {
+      viewModel.isPortrait = UIScreen.main.bounds.height > Constant.minorScreenWidth
     }
   }
 

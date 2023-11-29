@@ -9,13 +9,7 @@ import SwiftUI
 
 struct CalculatorView: View {
 
-  let pads: [[CalculatorItem]] = [
-    [.command(.clear), .command(.negate), .command(.percent), .op(.divide)],
-    [.digit(7), .digit(8), .digit(9), .op(.multiply)],
-    [.digit(4), .digit(5), .digit(6), .op(.minus)],
-    [.digit(1), .digit(2), .digit(3), .op(.plus)],
-    [.digit(0), .dot, .op(.equal)],
-  ]
+  @EnvironmentObject var viewModel: BiCalculatorViewModel
 
   var body: some View {
     GeometryReader { geometry in
@@ -32,12 +26,11 @@ struct CalculatorView: View {
 
   @ViewBuilder
   private func display(offeredSize: CGSize) -> some View {
-    let isPortrait = offeredSize.height > Constant.minorScreenWidth
-    let fontSize = Constants.displayFont(isPortrait: isPortrait)
-    let height = Constants.displayHeight(isPortrait: isPortrait)
+    let fontSize = Constants.displayFont(isPortrait: viewModel.isPortrait)
+    let height = Constants.displayHeight(isPortrait: viewModel.isPortrait)
     HStack {
       Spacer()
-      Text("1,335")
+      Text(viewModel.state.output)
         .font(.system(size: fontSize))
         .frame(height: height)
     }
@@ -45,9 +38,8 @@ struct CalculatorView: View {
 
   @ViewBuilder
   private func record(offeredSize: CGSize) -> some View {
-    let isPortrait = offeredSize.height > Constant.minorScreenWidth
-    let fontSize = Constants.recordFont(isPortrait: isPortrait)
-    let height = Constants.recordHeight(isPortrait: isPortrait)
+    let fontSize = Constants.recordFont(isPortrait: viewModel.isPortrait)
+    let height = Constants.recordHeight(isPortrait: viewModel.isPortrait)
     HStack(alignment: .bottom) {
       Text("89x15=1335")
         .font(.system(size: fontSize))
@@ -59,7 +51,7 @@ struct CalculatorView: View {
   @ViewBuilder
   private func pads(offeredSize: CGSize) -> some View {
     VStack(alignment: .leading, spacing: Constants.Scale.buttonPadding) {
-      ForEach(pads, id: \.self) { items in
+      ForEach(viewModel.pads, id: \.self) { items in
         row(for: items, offeredSize: offeredSize)
       }
     }
@@ -76,7 +68,7 @@ struct CalculatorView: View {
           backgroundColorName: item.backgroundColorName,
           size: itemSize)
         {
-          print(item.title)
+          viewModel.apply(item: item)
         }
       }
     }

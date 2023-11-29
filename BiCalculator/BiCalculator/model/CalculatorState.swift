@@ -11,25 +11,43 @@ enum CalculatorState {
   typealias Operator = CalculatorItem.Operator
   typealias Command = CalculatorItem.Command
 
-  case left(String)
+  // pending means you can still append digits to this operand, like 2 -> 23 -> 234
+  case leftPending(String)
+  // done means the operand is a result of previous calculation, it cannot append digits any more.
+  // e.g. 2 x 3 = 6, then you input a `2`, it cannot become 62, but start a new calculation
+  case leftDone(String)
   case leftOp(left: String, op: Operator)
-  case leftOpRight(left: String, op: Operator, right: String)
+  case leftOpRightPending(left: String, op: Operator, right: String)
+  case leftOpRightDone(left: String, op: Operator, right: String)
   case error
 
   var output: String {
-    let result =
     switch self {
-    case .left(let left):
-      left
+    case .leftPending(let left):
+      pendingOutput(str: left)
+    case .leftDone(let left):
+      doneOutput(str: left)
     case .leftOp(let left, _):
-      left
-    case .leftOpRight(_, _, let right):
-      right
+      doneOutput(str: left)
+    case .leftOpRightPending(_, _, let right):
+      pendingOutput(str: right)
+    case .leftOpRightDone(_, _, let right):
+      doneOutput(str: right)
     case .error:
       "Error!"
     }
-    guard let number = Double(result) else { return "Error" }
-    return Constant.displayFormatter.string(from: number as NSNumber) ?? "0"
+  }
+
+  private func pendingOutput(str: String) -> String {
+    guard let number = Double(str) else { return "Error" }
+    return NumberFormatter.localizedString(from: number as NSNumber, number: .decimal)
+  }
+
+  private func doneOutput(str: String) -> String {
+    guard let number = Double(str) else { return "Error" }
+    let formatted =
+      (Constant.displayFormatter.string(from: number as NSNumber) ?? "0").trimmingFragmentZeros()
+    return formatted
   }
 
   // state transfer function
@@ -48,14 +66,14 @@ enum CalculatorState {
 
   private func apply(digit: Int) -> CalculatorState {
     switch self {
-    case .left(let left):
-        .left(left.takesIn(digit: digit))
+    case .leftPending(let left):
+      .leftPending(left.takesIn(digit: digit))
     case .leftOp(let left, let op):
-        .leftOpRight(left: left, op: op, right: "\(digit)")
-    case .leftOpRight(let left, let op, let right):
-        .leftOpRight(left: left, op: op, right: right.takesIn(digit: digit))
-    case .error:
-        .left("\(digit)")
+      .leftOpRightPending(left: left, op: op, right: "\(digit)")
+    case .leftOpRightPending(let left, let op, let right):
+      .leftOpRightPending(left: left, op: op, right: right.takesIn(digit: digit))
+    case .leftDone, .leftOpRightDone, .error:
+      .leftPending("\(digit)")
     }
   }
 
@@ -73,61 +91,64 @@ enum CalculatorState {
   private func apply(op: Operator) -> CalculatorState {
     switch op {
     case .plus:
-      applyPlus()
+      applyOperator(operatr: .plus)
     case .minus:
-      applyMinus()
+      applyOperator(operatr: .minus)
     case .multiply:
-      applyMultiply()
+      applyOperator(operatr: .multiply)
     case .divide:
-      applyDivide()
+      applyOperator(operatr: .divide)
     case .equal:
-      applyEqual()
+      applyOperator(operatr: .equal)
     }
   }
 
   private func applyDot() -> CalculatorState {
     switch self {
-    case .left(let left):
-      return .left(left.takesInDot())
+    case .leftPending(let left):
+      .leftPending(left.takesInDot())
     case .leftOp(let left, let op):
-      return op == .equal ? .left("0.") : .leftOpRight(left: left, op: op, right: "0.")
-    case .leftOpRight(let left, let op, let right):
-      let newRight = right.contains(".") ? right : (right + ".")
-      return .leftOpRight(left: left, op: op, right: right.takesInDot())
-    case .error:
-      return .left("0.")
+      .leftOpRightPending(left: left, op: op, right: "0.")
+    case .leftOpRightPending(let left, let op, let right):
+      .leftOpRightPending(left: left, op: op, right: right.takesInDot())
+    case .leftDone, .leftOpRightDone, .error:
+      .leftPending("0.")
     }
   }
 
   // MARK: - Apply command
 
   private func applyClear() -> CalculatorState {
-    .left("0")
+    .leftPending("0")
   }
 
   private func applyNegate() -> CalculatorState {
     switch self {
-    case .left(let left):
-      .left(negate(string: left))
+    case .leftPending(let left):
+      .leftPending(negate(string: left))
+    case .leftDone(let left):
+      .leftDone(negate(string: left))
     case .leftOp(left: let left, op: let op):
-      .leftOpRight(left: left, op: op, right: "-0")
-    case .leftOpRight(left: let left, op: let op, right: let right):
-      .leftOpRight(left: left, op: op, right: negate(string: right))
-    case .error:
-      .left("-0")
+      .leftOpRightPending(left: left, op: op, right: "-0")
+    case .leftOpRightPending(left: let left, op: let op, right: let right):
+      .leftOpRightDone(left: left, op: op, right: negate(string: right))
+    case .leftOpRightDone, .error:
+      .leftPending("-0")
     }
   }
 
   private func applyPercent() -> CalculatorState {
     switch self {
-    case .left(let left):
-      .left(percent(string: left))
+    case .leftPending(let left):
+      .leftDone(percent(string: left))
+    case .leftDone(let left):
+      .leftDone(percent(string: left))
     case .leftOp(left: let left, op: let op):
       .leftOp(left: percent(string: left), op: op)
-    case .leftOpRight(left: let left, op: let op, right: let right):
-      .leftOpRight(left: left, op: op, right: percent(string: right))
-    case .error:
-      .error
+    case .leftOpRightPending(left: let left, op: let op, right: let right):
+      .leftOpRightDone(left: left, op: op, right: percent(string: right))
+    case .leftOpRightDone, .error:
+        .leftPending("0")
     }
   }
 
@@ -135,59 +156,32 @@ enum CalculatorState {
 
   private func applyOperator(operatr: Operator) -> CalculatorState {
     switch self {
-    case .left(let left):
-      return .leftOp(left: left, op: operatr)
-    case .leftOp(let left, _):
-      return .leftOp(left: left, op: operatr)
-    case .leftOpRight(let left, let op, let right):
+    case .leftPending(let left):
+      return operatr == .equal ? .leftDone(left) : .leftOp(left: left, op: operatr)
+    case .leftDone(let left):
+      return operatr == .equal ? .leftDone(left) : .leftOp(left: left, op: operatr)
+    case .leftOp(let left, let op):
+      guard operatr == .equal else { return .leftOp(left: left, op: operatr) }
+      // [2 +] takes in `=`, this means [2 + 2 =]
+      guard let left = Double(left) else { return .error }
+      let result = calculate(left: left, op: op, right: left)
+      return .leftDone("\(result)")
+    case .leftOpRightPending(let left, let op, let right):
       // calculate as the input sequence, not as the arithmetic associative property
       guard let left = Double(left), let right = Double(right) else { return .error }
       // divided by zero
-      if right == 0 && op == .divide { return .error }
+      guard !(right == 0 && op == .divide) else { return .error }
       let result = calculate(left: left, op: op, right: right)
-      return .leftOp(left: "\(result)", op: operatr)
-    case .error:
-      return .leftOp(left: "0", op: operatr)
-    }
-  }
-
-  private func applyPlus() -> CalculatorState {
-    applyOperator(operatr: .plus)
-  }
-
-  private func applyMinus() -> CalculatorState {
-    applyOperator(operatr: .minus)
-  }
-
-  private func applyMultiply() -> CalculatorState {
-    applyOperator(operatr: .multiply)
-  }
-
-  private func applyDivide() -> CalculatorState {
-    applyOperator(operatr: .divide)
-  }
-
-  private func applyEqual() -> CalculatorState {
-    switch self {
-    case .left(let left):
-      return .left(left)
-
-    case .leftOp(let left, let op):
-      // 2+ takes in =, means 2+2
-
-      guard let left = Double(left) else { return .error }
-      // divided by zero
-      if left == 0 && op == .divide { return .error }
-      let result = calculate(left: left, op: op, right: left)
-      return .leftOp(left: "\(result)", op: op)
-    case .leftOpRight(let left, let op, let right):
+      return operatr == .equal ? .leftDone("\(result)") : .leftOp(left: "\(result)", op: operatr)
+    case .leftOpRightDone(left: let left, op: let op, right: let right):
+      // calculate as the input sequence, not as the arithmetic associative property
       guard let left = Double(left), let right = Double(right) else { return .error }
       // divided by zero
-      if right == 0 && op == .divide { return .error }
+      guard !(right == 0 && op == .divide) else { return .error }
       let result = calculate(left: left, op: op, right: right)
-      return .left("\(result)")
+      return operatr == .equal ? .leftDone("\(result)") : .leftOp(left: "\(result)", op: operatr)
     case .error:
-      return .left("0")
+      return .leftOp(left: "0", op: operatr)
     }
   }
 
@@ -225,11 +219,15 @@ enum CalculatorState {
 extension CalculatorState {
   var left: String? {
     switch self {
-    case .left(let left):
+    case .leftPending(let left):
+      left
+    case .leftDone(let left):
       left
     case .leftOp(let left, _):
       left
-    case .leftOpRight(let left, _, _):
+    case .leftOpRightPending(let left, _, _):
+      left
+    case .leftOpRightDone(let left, _, _):
       left
     case .error:
       nil
@@ -238,20 +236,24 @@ extension CalculatorState {
 
   var right: String? {
     switch self {
-    case .left, .leftOp, .error:
+    case .leftPending, .leftDone, .leftOp, .error:
       nil
-    case .leftOpRight(_, _, let right):
+    case .leftOpRightPending(_, _, let right):
+      right
+    case .leftOpRightDone(_, _, let right):
       right
     }
   }
 
   var op: String? {
     switch self {
-    case .left, .error:
+    case .leftPending, .leftDone, .error:
       nil
     case .leftOp(_, op: let op):
       op.rawValue
-    case .leftOpRight(_, op: let op, _):
+    case .leftOpRightPending(_, op: let op, _):
+      op.rawValue
+    case .leftOpRightDone(_, op: let op, _):
       op.rawValue
     }
   }
@@ -265,25 +267,39 @@ extension CalculatorState {
   }
 }
 
-extension CalculatorState: Equatable {
-  static func == (lhs: Self, rhs: Self) -> Bool {
-    lhs.left == rhs.left
-    && lhs.right == rhs.right
-    && lhs.op == rhs.op
-    && lhs.isError == rhs.isError
-  }
-}
+extension CalculatorState: Equatable { }
 
 extension String {
-  func takesIn(digit: Int) -> String {
+  fileprivate func takesIn(digit: Int) -> String {
     if digit == 0 && (self == "0" || self == "-0") {
       self
+    } else if self == "0" {
+      "\(digit)"
+    } else if self == "-0" {
+      "-\(digit)"
     } else {
       self + "\(digit)"
     }
   }
 
-  func takesInDot() -> String {
+  fileprivate func takesInDot() -> String {
     self.contains(".") ? self : (self + ".")
+  }
+
+  fileprivate func trimmingFragmentZeros() -> String {
+    var result = self
+    if result.contains(".") {
+      result = result.trimmingCharacters(in: CharacterSet(arrayLiteral: "0"))
+    }
+    if result.hasSuffix(".") {
+      result = String(result.dropLast())
+    }
+    if result == "" {
+      result = "0"
+    }
+    if result.starts(with: ".") {
+      result = "0" + result
+    }
+    return result
   }
 }

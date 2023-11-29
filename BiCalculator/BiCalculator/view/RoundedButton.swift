@@ -9,7 +9,7 @@ import SwiftUI
 
 struct RoundedButton: View {
 
-  @State private var fontSize: CGFloat = Constant.screenWidth > Constant.minorScreenWidth ? 32 : 50
+  @EnvironmentObject var viewModel: BiCalculatorViewModel
 
   let title: String
   let backgroundColorName: String
@@ -21,14 +21,11 @@ struct RoundedButton: View {
   var body: some View {
     Button(action: action) {
       Text(title)
-        .font(.system(size: fontSize))
+        .font(.system(size: viewModel.isPortrait ? 50 : 32))
         .foregroundStyle(Color(foregroundColorName))
         .frame(width: size.width, height: size.height)
         .background(Color(backgroundColorName))
         .cornerRadius(10)
-        .onRotate { orientation in
-          fontSize = orientation.isPortrait ? 50 : 32
-        }
     }
   }
 }

@@ -12,6 +12,7 @@ struct BiCalculatorApp: App {
   var body: some Scene {
     WindowGroup {
       BiCalculatorView()
+        .environmentObject(BiCalculatorViewModel())
     }
   }
 }

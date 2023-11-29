@@ -12,4 +12,12 @@ enum Constant {
   static let screenHeight = UIScreen.main.bounds.height
 
   static let minorScreenWidth = min(screenWidth, screenHeight)
+
+  static let displayFormatter: NumberFormatter = {
+    let fmt = NumberFormatter()
+    fmt.minimumFractionDigits = 0
+    fmt.maximumFractionDigits = 12
+    fmt.numberStyle = .decimal
+    return fmt
+  }()
 }
