@@ -10,26 +10,38 @@ import Foundation
 // MARK: - formatting
 
 extension String {
+  /// use String to avoid precision lost
   var pendingFormattedString: String {
     if self == "" { return "" }
-    guard let number = Constant.displayFormatter.number(from: self) else {
-      return "Error"
+    // fragment
+    if self.contains(".") {
+      let components = self.components(separatedBy: ".")
+      let fullPart = components[0] == "" ? "0" : components[0]
+      let fragmentPart = components[1]
+      return fullPart.addingGroupSymbol + "." + fragmentPart
     }
-    let components = self.components(separatedBy: ".")
-    let formattedFragment = components.count > 1 ? components[1] : ""
-    let formattedInt = Constant.displayFormatter.string(from: number.doubleValue.rounded(.towardZero) as NSNumber) ?? "0"
-
-    return self.contains(".") ? (formattedInt + "." + formattedFragment) : formattedInt
+    // Full number
+    else {
+      return self.addingGroupSymbol
+    }
   }
 
   var finishedFormattedString: String {
     if self == "" { return "" }
-    guard let number = Constant.displayFormatter.number(from: self) else {
-      return "Error"
+    return pendingFormattedString.trimmingFragmentZeros()
+  }
+
+  private var addingGroupSymbol: String {
+    let reversed = String(self.reversed())
+    var result = ""
+    for (index, ch) in reversed.enumerated() {
+      result.append(ch)
+      if index % 3 == 2 && index != reversed.count - 1 {
+        result.append(",")
+      }
     }
-    let formatted =
-      (Constant.displayFormatter.string(from: number) ?? "0").trimmingFragmentZeros()
-    return formatted
+
+    return String(result.reversed())
   }
 }
 

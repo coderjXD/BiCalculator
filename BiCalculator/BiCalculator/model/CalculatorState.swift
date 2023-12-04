@@ -81,13 +81,13 @@ enum CalculatorState {
   private func apply(op: Operator) -> CalculatorState {
     switch op {
     case .plus:
-      applyNonEqualOperator(operatr: .plus)
+      applyNonEqualOperator(theOperator: .plus)
     case .minus:
-      applyNonEqualOperator(operatr: .minus)
+      applyNonEqualOperator(theOperator: .minus)
     case .multiply:
-      applyNonEqualOperator(operatr: .multiply)
+      applyNonEqualOperator(theOperator: .multiply)
     case .divide:
-      applyNonEqualOperator(operatr: .divide)
+      applyNonEqualOperator(theOperator: .divide)
     case .equal:
       applyEqual()
     }
@@ -163,69 +163,71 @@ enum CalculatorState {
       return .leftDone(left)
     case .leftOp(let left, let op):
       // [2 +] takes in `=`, this means [2 + 2 =]
-      guard let left = Double(left) else { return .error }
-      // divided by 0
-      guard !(left == 0 && op == .divide) else { return .error }
-      let result = calculate(left: left, op: op, right: left)
-      return .leftDone("\(result)")
+      // calculate as the input sequence, not as the arithmetic associative property
+      guard let leftDecimal = Decimal(string: left) else { return .error }
+      // divided by zero
+      if isDividedByZero(number: leftDecimal, op: op) { return .error }
+      let resultDecimal = calculate(left: leftDecimal, op: op, right: leftDecimal)
+      return .leftDone(resultDecimal.description)
     case .leftOpRightPending(let left, let op, let right):
-      // calculate as the input sequence, not as the arithmetic associative property
-      guard let left = Double(left), let right = Double(right) else { return .error }
+      guard let leftDecimal = Decimal(string: left), let rightDecimal = Decimal(string: right) else { return .error }
       // divided by zero
-      guard !(right == 0 && op == .divide) else { return .error }
-      let result = calculate(left: left, op: op, right: right)
-      return .leftDone("\(result)")
+      if isDividedByZero(number: rightDecimal, op: op) { return .error }
+      let resultDecimal = calculate(left: leftDecimal, op: op, right: rightDecimal)
+      return .leftDone(resultDecimal.description)
     case .leftOpRightDone(left: let left, op: let op, right: let right):
-      // calculate as the input sequence, not as the arithmetic associative property
-      guard let left = Double(left), let right = Double(right) else { return .error }
+      guard let leftDecimal = Decimal(string: left), let rightDecimal = Decimal(string: right) else { return .error }
       // divided by zero
-      guard !(right == 0 && op == .divide) else { return .error }
-      let result = calculate(left: left, op: op, right: right)
-      return .leftDone("\(result)")
+      if isDividedByZero(number: rightDecimal, op: op) { return .error }
+      let resultDecimal = calculate(left: leftDecimal, op: op, right: rightDecimal)
+      return .leftDone(resultDecimal.description)
     case .error:
       return .leftPending("0")
     }
   }
 
-  private func applyNonEqualOperator(operatr: Operator) -> CalculatorState {
+  private func applyNonEqualOperator(theOperator: Operator) -> CalculatorState {
     switch self {
     case .leftPending(let left):
-      return .leftOp(left: left, op: operatr)
+      return .leftOp(left: left, op: theOperator)
     case .leftDone(let left):
-      return .leftOp(left: left, op: operatr)
+      return .leftOp(left: left, op: theOperator)
     case .leftOp(let left, _):
-      return .leftOp(left: left, op: operatr)
+      return .leftOp(left: left, op: theOperator)
     case .leftOpRightPending(let left, let op, let right):
-      // calculate as the input sequence, not as the arithmetic associative property
-      guard let left = Double(left), let right = Double(right) else { return .error }
+      guard let leftDecimal = Decimal(string: left), let rightDecimal = Decimal(string: right) else { return .error }
       // divided by zero
-      guard !(right == 0 && op == .divide) else { return .error }
-      let result = calculate(left: left, op: op, right: right)
-      return .leftOp(left: "\(result)", op: operatr)
+      if isDividedByZero(number: rightDecimal, op: op) { return .error }
+      let resultDecimal = calculate(left: leftDecimal, op: op, right: rightDecimal)
+      return .leftOp(left: resultDecimal.description, op: theOperator)
     case .leftOpRightDone(left: let left, op: let op, right: let right):
       // calculate as the input sequence, not as the arithmetic associative property
-      guard let left = Double(left), let right = Double(right) else { return .error }
-      // divided by zero
-      guard !(right == 0 && op == .divide) else { return .error }
-      let result = calculate(left: left, op: op, right: right)
-      return .leftOp(left: "\(result)", op: operatr)
+      guard let leftDecimal = Decimal(string: left), let rightDecimal = Decimal(string: right) else { return .error }
+      if isDividedByZero(number: rightDecimal, op: op) { return .error }
+      let resultDecimal = calculate(left: leftDecimal, op: op, right: rightDecimal)
+      return .leftOp(left: resultDecimal.description, op: theOperator)
     case .error:
-      return .leftOp(left: "0", op: operatr)
+      return .leftOp(left: "0", op: theOperator)
     }
   }
 
   // MARK: - Helpers
 
+  private func isDividedByZero(number: Decimal, op: Operator) -> Bool {
+    return number == .zero && op == .divide
+  }
+
   private func negate(string: String) -> String {
-    string.starts(with: "-") ? String(string.dropFirst()) : "-\(string)"
+    guard let number = Decimal(string: string) else { return "Error" }
+    return (number * Decimal(string: "-1")!).description
   }
 
   private func percent(string: String) -> String {
-    guard let number = Double(string) else { return "Error" }
-    return "\(number/100)"
+    guard let number = Decimal(string: string) else { return "Error" }
+    return (number / 100).description
   }
 
-  public func calculate(left: Double, op: Operator, right: Double) -> Double {
+  public func calculate(left: Decimal, op: Operator, right: Decimal) -> Decimal {
     let result =
     switch op {
     case .plus:
@@ -236,8 +238,8 @@ enum CalculatorState {
       left * right
     case .divide:
       left / right
-    case .equal:  // there is no such state that an `equal` is between two operands
-      0.0
+    case .equal:  // there is no such state that an `equal` is between two operands, so this would never be executed
+      Decimal.zero
     }
     return result
   }
